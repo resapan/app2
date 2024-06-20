@@ -27,7 +27,7 @@ ALIGNMENT_ANGLE = np.pi / 3
 MIN_VEL = 0.005
 MAX_VEL = 0.03
 # 境界で働く力（0にすると自由境界）
-BOUNDARY_FORCE = 0.001
+BOUNDARY_FORCE = -0.001
 # エサに吸引される力と動かす間隔
 PREY_FORCE = -0.0005
 PREY_MOVEMENT_STEP = 150
