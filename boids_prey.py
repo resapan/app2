@@ -29,7 +29,7 @@ MAX_VEL = 0.03
 # 境界で働く力（0にすると自由境界）
 BOUNDARY_FORCE = 0.001
 # エサに吸引される力と動かす間隔
-PREY_FORCE = 0.0005
+PREY_FORCE = -0.0005
 PREY_MOVEMENT_STEP = 150
 
 # 位置と速度
@@ -86,7 +86,7 @@ while visualizer:
 
 
 
-    
+
 
     if t % PREY_MOVEMENT_STEP == 0:
         prey_x = np.random.rand(1, 3) * 2 - 1
@@ -101,6 +101,3 @@ while visualizer:
     # 位置のアップデート
     x += v
     visualizer.update(x, v)
-
-
-
