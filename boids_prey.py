@@ -12,7 +12,7 @@ visualizer = SwarmVisualizer()
 # シミュレーションパラメタ
 N = 256
 # 力の強さ
-COHESION_FORCE = 0.008
+COHESION_FORCE = -0.008
 SEPARATION_FORCE = 0.4
 ALIGNMENT_FORCE = 0.06
 # 力の働く距離
