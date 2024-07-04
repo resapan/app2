@@ -5,6 +5,8 @@ import sys, os
 sys.path.append(os.pardir)  # 親ディレクトリのファイルをインポートするための設定
 import numpy as np
 from alifebook_lib.visualizers import SwarmVisualizer
+from vispy.scene import visuals
+import vispy.app  # vispy.app モジュールをインポートする
 
 # visualizerの初期化 (Appendix参照)
 visualizer = SwarmVisualizer()
@@ -33,8 +35,10 @@ PREY_FORCE = 0.0005
 PREY_MOVEMENT_STEP = 500
 # 敵から避ける力と敵の移動間隔
 PREDATOR_FORCE = 0.2
-PREDATOR_DISTANCE = 1.0
+PREDATOR_DISTANCE = 0.5
 PREDATOR_MOVEMENT_STEP = 500
+PREDATOR_TARGET_UPDATE_STEP = 1000  # プレデターのターゲット更新周期
+PREDATOR_SPEED = 0.01  # プレデターの速度（例）
 
 # 位置と速度
 x = np.random.rand(N, 3) * 2 - 1
@@ -52,6 +56,17 @@ dv_ali = np.empty((N, 3))
 dv_boundary = np.empty((N, 3))
 # 敵から避ける力を代入する変数
 dv_predator = np.empty((N, 3))
+
+# プレデターが追うターゲットのインデックス
+predator_target_idx = None
+
+# 青色のマーカーを表示するためのマーカーオブジェクトを作成
+def create_marker_visuals(visualizer, positions, color=(0, 0, 1), size=20):
+    if not hasattr(visualizer, '_blue_markers'):
+        visualizer._blue_markers = visuals.Markers(parent=visualizer._view.scene)
+    visualizer._blue_markers.set_data(positions, face_color=color, size=size)
+    visualizer._canvas.update()
+    vispy.app.process_events()
 
 t = 0
 while visualizer:
@@ -75,7 +90,8 @@ while visualizer:
         dv_ali[i] = ALIGNMENT_FORCE * (np.average(ali_agents_v, axis=0) - v_this) if (len(ali_agents_v) > 0) else 0
         dist_center = np.linalg.norm(x_this)  # 原点からの距離
         dv_boundary[i] = - BOUNDARY_FORCE * x_this * (dist_center - 1) / dist_center if (dist_center > 1) else 0
-        # 敵から避ける力の計算
+
+        # プレデターから避ける力の計算
         dist_predator = np.linalg.norm(predator_x - x_this)
         if dist_predator < PREDATOR_DISTANCE:
             dv_predator[i] = PREDATOR_FORCE * (x_this - predator_x) / dist_predator
@@ -93,9 +109,26 @@ while visualizer:
     if t % PREDATOR_MOVEMENT_STEP == 0:
         predator_x = np.random.rand(1, 3) * 2 - 1
 
-    # エサと敵の位置を表示
-    visualizer.set_markers(np.vstack((prey_x, predator_x)))
+    # プレデターのターゲット選択
+    if t % PREDATOR_TARGET_UPDATE_STEP == 0:
+        distances_to_predator = np.linalg.norm(x - predator_x, axis=1)
+        predator_target_idx = np.argmin(distances_to_predator)
 
+    # プレデターのターゲットに基づいた動き
+    if predator_target_idx is not None:
+        target_position = x[predator_target_idx]
+        direction_to_target = target_position - predator_x
+        direction_to_target_norm = np.linalg.norm(direction_to_target)
+        if direction_to_target_norm > 0:
+            predator_v = PREDATOR_SPEED * direction_to_target / direction_to_target_norm
+        else:
+            predator_v = np.zeros_like(predator_x)
+        predator_x += predator_v
+
+    # エサと敵の位置を表示
+    create_marker_visuals(visualizer, np.vstack(predator_x))
+    visualizer.set_markers(np.vstack(prey_x))
+    
     t += 1
 
     for i in range(N):
