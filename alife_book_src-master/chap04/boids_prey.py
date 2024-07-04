@@ -36,7 +36,6 @@ PREY_MOVEMENT_STEP = 500
 # 敵から避ける力と敵の移動間隔
 PREDATOR_FORCE = 0.2
 PREDATOR_DISTANCE = 0.5
-PREDATOR_MOVEMENT_STEP = 500
 PREDATOR_TARGET_UPDATE_STEP = 1000  # プレデターのターゲット更新周期
 PREDATOR_SPEED = 0.01  # プレデターの速度（例）
 
@@ -106,8 +105,6 @@ while visualizer:
     if t % PREY_MOVEMENT_STEP == 0:
         prey_x = np.random.rand(1, 3) * 2 - 1
 
-    if t % PREDATOR_MOVEMENT_STEP == 0:
-        predator_x = np.random.rand(1, 3) * 2 - 1
 
     # プレデターのターゲット選択
     if t % PREDATOR_TARGET_UPDATE_STEP == 0:
